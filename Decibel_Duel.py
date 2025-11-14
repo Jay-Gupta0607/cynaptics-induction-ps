@@ -21,7 +21,7 @@ BATCH_SIZE = 32
 NUM_EPOCHS = 200
 TEST_SIZE = 0.2
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda")
 print(f"Using device: {DEVICE}")
 
 CATEGORIES = []
@@ -57,7 +57,6 @@ def load_data(data_dir):
 
 def load_test_files(data_dir):
     audio_paths = []
-    print(f"Scanning test data in: {data_dir}")
     for root, _, files in os.walk(data_dir):
         for filename in files:
             if filename.lower().endswith(('.wav', '.mp3', '.flac', '.ogg')):
@@ -172,35 +171,35 @@ class CNNClassifier(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2),
             nn.Dropout(0.2)
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.Conv2d(16, 32, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2),
             nn.Dropout(0.2)
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2),
             nn.Dropout(0.2)
         )
         self.conv4 = nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2),
             nn.Dropout(0.2)
         )
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
-            nn.Linear(256, 512),
+            nn.Linear(128, 256),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(512, num_classes)
+            nn.Linear(256, num_classes)
         )
 
     def forward(self, x):
@@ -336,7 +335,7 @@ def main(data_folder_path, model_save_path):
 
     CATEGORIES = dynamic_categories
     NUM_CLASSES = len(CATEGORIES)
-    print(f"\n--- Found {len(all_audio_paths)} files across {NUM_CLASSES} classes: {CATEGORIES} ---\n")
+    print(f"\nFound {len(all_audio_paths)} files across {NUM_CLASSES} classes: {CATEGORIES}\n")
 
     train_paths, val_paths, train_labels, val_labels = train_test_split(
         all_audio_paths, all_labels, test_size=TEST_SIZE, random_state=42, stratify=all_labels
@@ -354,7 +353,7 @@ def main(data_folder_path, model_save_path):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
 
     best_accuracy = 0.0
-    print("Starting training...")
+    print("Starting training")
     for epoch in range(1, NUM_EPOCHS + 1):
         train_loss = train_model(model, train_loader, criterion, optimizer, DEVICE)
         val_loss, val_accuracy = evaluate_model(model, val_loader, criterion, DEVICE)
@@ -382,7 +381,7 @@ if __name__ == '__main__':
     MODEL_SAVE_PATH = 'best_audio_classifier.pth'
     OUTPUT_CSV_PATH = 'predictions.csv'
 
-    print("--- STARTING TRAINING PHASE ---")
+    print("Staring Training")
     best_val_accuracy, trained_categories = main(
         data_folder_path=TRAIN_DATA_PATH,
         model_save_path=MODEL_SAVE_PATH
@@ -393,7 +392,7 @@ if __name__ == '__main__':
     else:
         print(f"\nTraining complete. Best Validation Acc: {best_val_accuracy:.4f}")
         
-        print("\n--- STARTING TESTING PHASE ---")
+        print("\nStarting Testing")
         generate_test_predictions(
             model_path=MODEL_SAVE_PATH,
             test_data_dir=TEST_DATA_PATH,
