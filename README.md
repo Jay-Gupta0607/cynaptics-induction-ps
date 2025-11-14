@@ -26,31 +26,11 @@ Prediction Generation: Generates a predictions.csv file for the test dataset, fo
 The script expects a specific folder structure to locate the training and testing data.
 
 Training Data
-Your training audio files must be organized into subfolders, where each subfolder's name represents a class label.
-
-the-frequency-quest/
-└── train/
-    ├── class_A/
-    │   ├── file1.wav
-    │   ├── file2.mp3
-    │   └── ...
-    ├── class_B/
-    │   ├── file3.wav
-    │   ├── file4.ogg
-    │   └── ...
-    └── class_C/
-        └── ...
 The script will automatically detect class_A, class_B, and class_C as the output categories.
 
 Test Data
-The test audio files should be in a separate folder. The script will process all audio files found in this directory.
+The test audio files should be in a separate folder.
 
-the-frequency-quest/
-└── test/
-    ├── test_file_001.wav
-    ├── test_file_002.mp3
-    ├── test_file_003.flac
-    └── ...
 🚀 Usage
 1. Requirements
 You can install the necessary Python packages using pip:
@@ -118,10 +98,10 @@ Four Convolutional Blocks:
 
 Conv2d -> ReLU -> MaxPool2d -> Dropout
 
-The channel depth increases with each block: 1 -> 32 -> 64 -> 128 -> 256.
+The channel depth increases with each block: 1 -> 16 -> 32 -> 64 -> 128.
 
 Global Pooling: An nn.AdaptiveAvgPool2d(1) layer reduces the spatial dimensions of each feature map to 1x1, effectively summarizing the features.
 
-Flatten: The output is flattened to [Batch, 256].
+Flatten: The output is flattened to [Batch, 128].
 
 Fully Connected Head: A 2-layer classifier (nn.Linear(256, 512) -> ReLU -> Dropout -> nn.Linear(512, num_classes)) produces the final logits for classification.
